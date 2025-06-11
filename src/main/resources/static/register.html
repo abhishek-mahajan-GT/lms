@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+</head>
+<body>
+    <div>
+        <h2>Register New User</h2>
+        <form id="registrationForm">
+            <div>
+                <label for="username">Username:</label><br>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Register</button>
+            <div id="reg-message"></div>
+        </form>
+        <p>
+            Already have an account? <a href="login.html">Login here</a>
+        </p>
+    </div>
+
+    <script>
+        function displayMessage(messageElementId, text) 
+        {
+            const messageDiv = document.getElementById(messageElementId);
+            messageDiv.textContent = text;
+        }
+
+        function clearMessage(messageElementId)
+         {
+            const messageDiv = document.getElementById(messageElementId);
+            messageDiv.textContent = '';
+        }
+
+        const registrationForm = document.getElementById('registrationForm');
+        registrationForm.addEventListener('submit', async (event) => 
+        {
+            event.preventDefault();
+            clearMessage('reg-message');
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const userData = { username, email, password };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/register',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+
+                const responseText = await response.text();
+
+                if (response.ok) 
+                { 
+                    displayMessage('reg-message', `Registration successful: ${responseText}`);
+                    registrationForm.reset();
+                } 
+                else 
+                {
+                    displayMessage('reg-message', `Registration failed: ${responseText}`);
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+                displayMessage('reg-message', 'An unexpected error occurred during registration. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+</head>
+<body>
+    <div>
+        <h2>User Login</h2>
+        <form id="loginForm">
+            <div>
+                <label for="login-username-email">Email:</label><br>
+                <input type="text" id="login-username-email" name="Email" required>
+            </div>
+            <div>
+                <label for="login-password">Password:</label><br>
+                <input type="password" id="login-password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+            <div id="login-message"></div>
+        </form>
+        <button id="checkAuthButton">
+            Check Auth Status
+        </button>
+        <div id="checkAuthMessage"></div>
+        <p>
+            Don't have an account? <a href="register.html">Register here</a>
+        </p>
+    </div>
+
+    <script>
+        function displayMessage(messageElementId, text) {
+            const messageDiv = document.getElementById(messageElementId);
+            messageDiv.textContent = text;
+        }
+
+        function clearMessage(messageElementId) {
+            const messageDiv = document.getElementById(messageElementId);
+            messageDiv.textContent = '';
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearMessage('login-message');
+
+            const email = document.getElementById('login-username-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const loginData = { Email: email, password: password };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData),
+                    credentials: 'include'
+                });
+
+                const responseText = await response.text();
+
+                if (response.ok) {
+                    displayMessage('login-message', `Login successful: ${responseText}`);
+                    await checkAuthStatus(); 
+                } else {
+                    displayMessage('login-message', `Login failed: ${responseText}`);
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                displayMessage('login-message', 'An unexpected error occurred during login. Please try again.');
+            }
+        });
+
+        const checkAuthButton = document.getElementById('checkAuthButton');
+        checkAuthButton.addEventListener('click', checkAuthStatus);
+
+        async function checkAuthStatus() {
+            clearMessage('checkAuthMessage');
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/check-auth', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const responseText = await response.text();
+
+                if (response.ok) {
+                    displayMessage('checkAuthMessage', `Auth Status: ${responseText}`);
+                } else {
+                    displayMessage('checkAuthMessage', `Auth Status: ${responseText}`);
+                }
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                displayMessage('checkAuthMessage', 'An unexpected error occurred while checking authentication.');
+            }
+        }
+    </script>
+</body>
+</html>
